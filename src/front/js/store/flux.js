@@ -1,21 +1,55 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			user: {}
 		},
 		actions: {
+			setUser: (user)=>{
+				setStore({user:user})
+			},
+
+			getUser: () => {
+				fetch(
+				  process.env.BACKEND_URL + "/api/user/" + localStorage.getItem("id"),
+				  {
+					method: "GET",
+					headers: {
+					  Authorization: "Bearer " + localStorage.getItem("token"),
+					},
+				  }
+				)
+				  .then((resp) => resp.json())
+				  .then((data) => {
+					setStore({ user: data[0] });
+				  });
+			  },
+
+			  loginUser: (user, navigate) =>{
+				fetch(
+					process.env.BACKEND_URL + "/api/login/",
+					{
+						method: "POST",
+						headers: {
+							// Authorization: "Bearer" + localStorage.getItem("token"),
+							"Content-type": "application/json"
+						},
+						body: JSON.stringify(user)
+					}
+				)
+				.then((resp)=> resp.json())
+				.then((data)=>{
+					console.log(data)
+					if (data.token){
+						localStorage.setItem("token", data.token)
+						navigate("/private")
+						// user.is_active = true
+						// setUserIsLogged?
+					}else{
+						console.log(data)
+					}
+				})
+			  },
+
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
